@@ -106,6 +106,16 @@ int main(void)
 
   HAL_StatusTypeDef test2 = SHT45_RCV_Data(&hi2c1, Data);
 
+
+  // TEST CRC z dokumetacji
+  uint8_t test_Data[6];
+  test_Data[3] = 0xBE;
+  test_Data[4] = 0xEF;
+  test_Data[5] = 0x92;
+
+  HAL_StatusTypeDef test3 = SHT45_ChkCRC(&test_Data[3]);
+
+
   /* USER CODE END 2 */
 
   /* Initialize leds */
