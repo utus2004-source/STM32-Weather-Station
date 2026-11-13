@@ -3,9 +3,9 @@
 
 // These values are used only inside this file.
 // They cannot be changed during program work.
-static const uint32_t Timeout = 100;
-static const uint16_t Dev_Adress = 0x44;
-static const uint16_t Buffor_Size = 6; // this is the size of data we get from sensor 6 bajts
+static const uint32_t timeout = 100;
+static const uint16_t dev_adress = 0x44;
+static const uint16_t buff_size = 6; // this is the size of data we get from sensor 6 bajts
 
 /**
  * @brief Checks if the SHT45 sensor is connected and working.
@@ -17,7 +17,7 @@ static const uint16_t Buffor_Size = 6; // this is the size of data we get from s
  */
 HAL_StatusTypeDef SHT45_InitSensor(I2C_HandleTypeDef *hi2c)
 {
-    return HAL_I2C_IsDeviceReady(hi2c, Dev_Adress << 1, 1, Timeout);
+    return HAL_I2C_IsDeviceReady(hi2c, dev_adress << 1, 1, timeout);
 }
 /**
  * @brief Sends a command to the SHT45 sensor.
@@ -39,7 +39,7 @@ HAL_StatusTypeDef SHT45_InitSensor(I2C_HandleTypeDef *hi2c)
  */
 HAL_StatusTypeDef SHT45_SND_Command(I2C_HandleTypeDef *hi2c, uint8_t command)
 {
-    return HAL_I2C_Master_Transmit(hi2c, Dev_Adress << 1, &command, 1, Timeout);
+    return HAL_I2C_Master_Transmit(hi2c, dev_adress << 1, &command, 1, Timeout);
 }
 
 /**
@@ -79,7 +79,7 @@ HAL_StatusTypeDef SHT45_RCV_Data(I2C_HandleTypeDef *hi2c, uint8_t *data)
         return HAL_ERROR;
     }
 
-    return HAL_I2C_Master_Receive(hi2c, Dev_Adress << 1, data, Buffor_Size, Timeout);
+    return HAL_I2C_Master_Receive(hi2c, dev_adress << 1, data, buff_size, timeout);
 }
 
 /**
