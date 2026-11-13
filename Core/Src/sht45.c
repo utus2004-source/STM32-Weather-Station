@@ -10,7 +10,10 @@ static const uint16_t Buffor_Size = 6; // this is the size of data we get from s
 /**
  * @brief Checks if the SHT45 sensor is connected and working.
  * @param hi2c Pointer to the I2C handle.
- * @return HAL_OK if the sensor responds, otherwise an HAL_ERROR status.
+ * @return HAL_OK       -> operation successful
+ *         HAL_ERROR    -> operation failed
+ *         HAL_BUSY     -> I2C peripheral busy (another transfer in progress)
+ *         HAL_TIMEOUT  -> operation did not complete within the timeout
  */
 HAL_StatusTypeDef SHT45_InitSensor(I2C_HandleTypeDef *hi2c)
 {
@@ -29,7 +32,10 @@ HAL_StatusTypeDef SHT45_InitSensor(I2C_HandleTypeDef *hi2c)
  * 0x2F -> activate heater with 110mW for 1s
  * including a high precision measurement just before deactivation
  * for the rest of commends check datasheet of SHT45
- * @return HAL_OK if the sensor responds, otherwise an HAL_ERROR status .
+ * @return HAL_OK       -> operation successful
+ *         HAL_ERROR    -> operation failed
+ *         HAL_BUSY     -> I2C peripheral busy (another transfer in progress)
+ *         HAL_TIMEOUT  -> operation did not complete within the timeout .
  */
 HAL_StatusTypeDef SHT45_SND_Command(I2C_HandleTypeDef *hi2c, uint8_t command)
 {
@@ -57,7 +63,10 @@ HAL_StatusTypeDef SHT45_SND_Command(I2C_HandleTypeDef *hi2c, uint8_t command)
  * of sensor cycle  e.g.: when measuring for 1s with heater then this is 10% of 10s
  * so next measurment with it can happen in 10 s
  * this values are MAX ones
- * @return HAL_OK if the sensor responds, otherwise an HAL_ERROR status .
+ * @return HAL_OK       -> operation successful
+ *         HAL_ERROR    -> operation failed
+ *         HAL_BUSY     -> I2C peripheral busy (another transfer in progress)
+ *         HAL_TIMEOUT  -> operation did not complete within the timeout .
  */
 HAL_StatusTypeDef SHT45_RCV_Data(I2C_HandleTypeDef *hi2c, uint8_t *data)
 {
@@ -82,7 +91,7 @@ HAL_StatusTypeDef SHT45_RCV_Data(I2C_HandleTypeDef *hi2c, uint8_t *data)
  * example: &rx[0] for temperature, &rx[3] for humidity.
  * @return HAL_OK if CRC is ok else HALL_ERROR.
  */
-HAL_StatusTypeDef SHT45_ChkCRC(uint8_t *data){
+HAL_StatusTypeDef SHT45_ChkCRC(const uint8_t *data){
 
 
 	uint8_t CRC_check;
@@ -124,14 +133,14 @@ HAL_StatusTypeDef SHT45_ChkCRC(uint8_t *data){
  * @param data it's pointer to the received data.
  * the pointer data needs at least 2 bytes, it is possible to point into
  * middle of the array data
- * @return Temperature in C.
+ * @return Temperature in °C.
  */
-float SHT45_CalcT(uint8_t *data){
+float SHT45_CalcT(const uint8_t *data){
 
 
-	uint16_t T_RAW = ((uint16_t)data[0] << 8) | data[1] ;
+	uint16_t t_raw = ((uint16_t)data[0] << 8) | data[1] ;
 
-	return -45 + 175 * T_RAW/65535.0;
+	return -45 + 175 * t_raw/65535.0f;
 
 }
 
@@ -140,15 +149,23 @@ float SHT45_CalcT(uint8_t *data){
  * @param data it's pointer to the received data.
  * the pointer data needs at least 2 bytes it is possible to point into
  * middle of the array data
- * @return Humidity in Rh.
+ * @return Humidity in %RH.
  */
-float SHT45_CalcRh(uint8_t *data){
+float SHT45_CalcRh( const uint8_t *data){
 
-	uint16_t RH_RAW = ((uint16_t)data[0] << 8) | data[1] ;
+	uint16_t rh_raw = ((uint16_t)data[0] << 8) | data[1] ;
+	float rh_cal = -6 +125 * rh_raw/65535.0f;
 
-	return -6 +125 * RH_RAW/65535.0;
 
+	if (rh_cal > 100){
+
+		rh_cal = 100.0f;
+
+	}else if (rh_cal < 0){
+
+		rh_cal = 0.0f;
+	}
+
+	return rh_cal;
 }
-
-
 
