@@ -19,9 +19,8 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "i2c.h"
+#include "spi.h"
 #include "gpio.h"
-#include "sht45.h"
-
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -91,6 +90,7 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_I2C1_Init();
+  MX_SPI2_Init();
   /* USER CODE BEGIN 2 */
   uint8_t Data[6];
   HAL_StatusTypeDef test = SHT45_InitSensor(&hi2c1);
